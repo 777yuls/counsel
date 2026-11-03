@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>COUNSEL LOG 상담 신청표</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Dodum&family=Jua&display=swap">
+
+<style>
+[hidden]{display:none!important}
+body{margin:0}
+img{max-width:100%}
+/* Layout: a weekly planner sheet on graph paper; title + game stickers on top, five pastel-labelled day boxes, guide and notes boxes below */
+:root{
+  --paper:#fbfbfd;
+  --grid:#e3e5f0;
+  --navy:#1f2459;
+  --navy-soft:#5b5f8c;
+  --mon:#bfdde3; --tue:#fdeea0; --wed:#fbd3b8; --thu:#f7d6dc; --fri:#bfdde3;
+  --note:#fdeea0;
+  --taken:#e9e6fb;
+  --closed:#eef0f4;
+  --display:"Black Han Sans","Jua",sans-serif;
+  --label:"Jua","Gowun Dodum",sans-serif;
+  --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background-color:var(--paper);color:var(--navy);font-family:var(--body);font-size:15px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(22px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px))}
+.sheet{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.titleblock{display:flex;flex-direction:column;gap:6px}
+h1{margin:0;font:clamp(34px,7vw,54px)/1 var(--display);letter-spacing:.02em;color:var(--navy)}
+.sub{font:16px var(--label);color:var(--navy-soft)}
+
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.weeknav{display:flex;align-items:center;gap:8px}
+.weeknav button,.btn{font:16px var(--label);color:var(--navy);background:#fff;border:2px solid var(--navy);border-radius:999px;padding:6px 14px;cursor:pointer}
+.weeknav button:disabled{opacity:.3;cursor:default}
+.weeknav button:not(:disabled):hover,.btn:hover{background:var(--note)}
+.weektitle{font:20px var(--label);min-width:0;text-align:center;padding-inline:4px}
+.namebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.namebar label{font:16px var(--label)}
+.namebar input{font:17px var(--body);color:var(--navy);background:#fff;border:2px solid var(--navy);padding:6px 10px;width:11em;max-width:100%;border-radius:2px}
+input:focus-visible,button:focus-visible{outline:3px solid #f3a97a;outline-offset:2px}
+.live{font:14px var(--label);color:var(--navy-soft);display:flex;align-items:center;gap:6px}
+.live i{width:9px;height:9px;border-radius:50%;background:#c7c9d6}
+.live.on i{background:#58b37a;box-shadow:0 0 0 3px #58b37a33}
+
+.week{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.day{min-width:0;display:flex;flex-direction:column;gap:8px}
+.dayhead{font:17px var(--label);text-align:center;padding:6px 4px;color:var(--navy);border:0;width:100%}
+.d0{background:var(--mon)}.d1{background:var(--tue)}.d2{background:var(--wed)}.d3{background:var(--thu)}.d4{background:var(--fri)}
+.dayhead.closed{text-decoration:line-through;opacity:.6}
+.dayhead.off{opacity:.45}
+button.dayhead{cursor:pointer}
+.dayhead small{font:12px var(--body);display:block;opacity:.8}
+.box{border:2px solid var(--navy);background:#fff;padding:8px;display:flex;flex-direction:column;gap:8px;min-height:220px;flex:1}
+.slot{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1.5px dashed var(--navy-soft);background:#fff;color:var(--navy);
+  padding:8px 9px;text-align:left;cursor:pointer;min-height:56px;width:100%;font-family:var(--body);border-radius:3px}
+.slot .t{font:15px var(--label);font-variant-numeric:tabular-nums}
+.slot .n{font:15px var(--body);overflow-wrap:anywhere;line-height:1.2}
+.slot.open .n{color:var(--navy-soft)}
+.slot.open:hover{background:#fffbe2;border-style:solid}
+.slot.taken{border:1.5px solid var(--navy);background:var(--taken);cursor:default}
+.slot.taken .n{font-weight:700}
+.slot.taken .n::before{content:"🎮 "}
+.slot.closed{background:repeating-linear-gradient(45deg,var(--closed) 0 6px,#fff 6px 12px);border-style:solid;border-color:#c7c9d6;color:#8a8ca8;cursor:default}
+.slot.past{opacity:.4;cursor:default}
+.teacher .slot.closed,.teacher .slot.taken,.teacher .slot.open{cursor:pointer}
+.teacher .box{border-color:#e06a3a}
+.teacher-banner{font:15px var(--label);background:#fbd3b8;border:2px solid var(--navy);padding:8px 12px}
+
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.guide{border:2px solid var(--navy);background:#fff;padding:14px 18px}
+.guide ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;line-height:1.5}
+.notes{display:flex;flex-direction:column;gap:10px}
+.notes h2{margin:0;background:var(--note);font:15px var(--label);text-align:center;padding:6px}
+.notes .inner{border:2px solid var(--navy);background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:16px;height:16px;border:1.5px solid var(--navy);display:inline-block}
+.lg-open{background:#fff;border-style:dashed!important}.lg-taken{background:var(--taken)}
+.lg-closed{background:repeating-linear-gradient(45deg,var(--closed) 0 3px,#fff 3px 6px)}
+
+/* dialog */
+.scrim{position:fixed;inset:0;background:rgba(31,36,89,.35);display:flex;align-items:flex-end;justify-content:center;z-index:20;
+  padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+@media (min-width:600px){.scrim{align-items:center}}
+.dialog{background:#fff;border:2px solid var(--navy);box-shadow:6px 6px 0 var(--navy);width:100%;max-width:420px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.dialog .who{font:15px var(--label);background:var(--note);align-self:flex-start;padding:3px 10px}
+.dialog p{margin:0;font-size:17px;line-height:1.5}
+.dialog input{font:18px var(--body);color:var(--navy);border:2px solid var(--navy);padding:8px 10px;width:100%}
+.dialog input.pw{letter-spacing:.4em;text-align:center}
+.choices{display:flex;gap:10px;justify-content:flex-end}
+.choices button{font:17px var(--label);border:2px solid var(--navy);border-radius:999px;padding:8px 18px;cursor:pointer;background:#fff;color:var(--navy)}
+.choices button.yes{background:var(--navy);color:#fff}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--navy);color:#fff;
+  font:16px var(--label);padding:10px 18px;border-radius:999px;z-index:30;max-width:calc(100% - 32px);text-align:center}
+
+@media (max-width:760px){
+  body{padding-block:14px 32px}
+  .week{grid-template-columns:1fr;gap:12px}
+  .day{gap:0}
+  .box{min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:0}
+  .dayhead{text-align:left;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border:2px solid var(--navy)}
+  .dayhead small{display:inline}
+  .bottom{grid-template-columns:1fr}
+  .toolbar{flex-direction:column;align-items:stretch}
+  .weeknav{justify-content:space-between}
+  .namebar input{flex:1;width:auto;min-width:0}
+  header{align-items:flex-start}
+}
+
+@media (max-width:760px){.day.gone .box{display:none}.day.gone .dayhead{opacity:.5;padding-block:6px}}
+@media (max-width:760px){
+  h1{font-size:36px}
+  .sub{font-size:14px}
+  .weeknav button{padding:8px 16px}
+  .slot{min-height:58px}
+  .guide,.notes .inner{padding:12px 14px}
+}
+
+/* phone: everything in the top area must fit the screen width */
+html,body{max-width:100%;overflow-x:hidden}
+.sheet,.toolbar,.namebar,.weeknav,header,.titleblock{min-width:0;max-width:100%}
+@media (max-width:760px){
+  header{display:block}
+  h1{font-size:clamp(26px,9vw,40px);overflow-wrap:anywhere}
+  .sub{font-size:14px}
+  .toolbar{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+  .weeknav{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:6px;align-items:center}
+  .weeknav button{width:44px;height:40px;padding:0}
+  .weektitle{font-size:clamp(15px,4.6vw,19px);overflow-wrap:anywhere;min-width:0}
+  .namebar{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center}
+  .namebar input{width:100%;min-width:0;flex:none}
+  .live{grid-column:1/-1;justify-self:end}
+  .slot{min-height:58px}
+  .guide,.notes .inner{padding:12px 14px}
+}
+
+.results{border:2px solid var(--navy);background:#fff;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.results .rh{font:15px var(--label)}
+.results button{font:15px var(--body);color:var(--navy);text-align:left;background:var(--taken);border:1.5px solid var(--navy);padding:8px 10px;cursor:pointer;width:100%;overflow-wrap:anywhere}
+.results .none{color:var(--navy-soft)}
+.slot.hit{outline:3px solid #f3a97a;outline-offset:1px}
+.pending{display:flex;flex-direction:column;gap:10px}
+.pending h2{margin:0;background:var(--wed);font:16px var(--label);text-align:center;padding:7px}
+.pending h2 span{font-variant-numeric:tabular-nums}
+.pending .inner{border:2px solid var(--navy);background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.pnote{margin:0;line-height:1.6;background:#fffbe2;border:1.5px dashed var(--navy-soft);padding:10px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{font:16px var(--label);border:1.5px solid var(--navy);background:var(--thu);padding:5px 12px;border-radius:999px}
+.pdone{margin:0;font:17px var(--label);text-align:center}
+</style>
+</head>
+<body>
+<div class="sheet" id="sheet">
+  <header>
+    <div class="titleblock">
+      <h1>COUNSEL LOG</h1>
+      <div class="sub">1:1 상담 신청표 (10월 29일부터 평일)</div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="weeknav">
+      <button id="prev" aria-label="이전 주">◀</button>
+      <div class="weektitle" id="weektitle"></div>
+      <button id="next" aria-label="다음 주">▶</button>
+    </div>
+    <div class="namebar">
+      <label for="myname">내 신청 찾기</label>
+      <input id="myname" type="search" maxlength="20" placeholder="이름으로 검색" autocomplete="off">
+      <span class="live" id="live"><i></i><span id="livetext">연결 중</span></span>
+    </div>
+  </div>
+
+  <div class="results" id="results" hidden></div>
+
+  <div class="teacher-banner" id="tbanner" hidden>선생님 모드: 요일 라벨을 누르면 하루 전체, 시간 칸을 누르면 그 시간만 상담불가로 바뀝니다. 신청된 칸을 누르면 취소할 수 있어요.</div>
+
+  <div class="week" id="week"></div>
+
+  <div class="bottom">
+    <div class="guide">
+      <ul>
+                <li>비어 있는 시간을 누르고 이름을 적으면 신청됩니다.</li>
+        <li>한 시간에 한 명만 신청할 수 있어요.</li>
+        <li>신청하면 모두에게 바로 이름이 보여요. 맨 위 검색창에 이름을 치면 내 신청만 모아 볼 수 있어요.</li>
+        <li>빗금 칸은 선생님이 상담할 수 없는 시간이에요.</li>
+        <li>바꾸거나 취소하려면 선생님께 말씀해 주세요.</li>
+      </ul>
+    </div>
+    <div class="notes">
+      <h2>Important Notes</h2>
+      <div class="inner">
+        <div>상담 시간은 <b>16:40</b>, <b>17:30</b>, <b>19:20</b>, <b>20:20</b> 네 번이에요.</div>
+        <div class="legend">
+          <span><i class="lg-open"></i>신청 가능</span>
+          <span><i class="lg-taken"></i>신청 완료</span>
+          <span><i class="lg-closed"></i>상담 불가</span>
+        </div>
+        <div><button class="btn" id="teacherBtn">🔒 선생님 모드</button></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="pending" id="pending" hidden>
+    <h2>아직 신청하지 않은 학생 <span id="pendingCount"></span></h2>
+    <div class="inner">
+      <p class="pnote">📢 아래 학생은 상담 시간을 따로 신청하지 않았으므로, <b>점심시간, 아침시간 등 선생님이 정한 시간에 랜덤으로 상담이 진행됩니다.</b> 원하는 시간에 상담하고 싶다면 위 표에서 빈 시간을 신청해 주세요.</p>
+      <div class="chips" id="pendingList"></div>
+      <p class="pdone" id="pendingDone" hidden>🎉 우리 반 모두 신청을 마쳤어요!</p>
+    </div>
+  </section>
+</div>
+<div class="scrim" id="scrim" hidden><div class="dialog" id="dialog" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+<script>
+(function(){
+  let TIMES = ['16:40','17:30','19:20','20:20'];
+  let START = new Date(2026,9,29);
+  const DOW = ['일','월','화','수','목','금','토'];
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2,'0');
+  const ymd = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  const mondayOf = d => { const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()-(x.getDay()+6)%7); return x; };
+  const today0 = new Date(); today0.setHours(0,0,0,0);
+  let firstMonday = mondayOf(START);
+  const homeWeek = () => mondayOf(today0 > START ? today0 : START);
+  let weekStart = homeWeek();
+  let ready=false, slots={}, closed={days:[],slots:[]}, teacherMode=false, teacherPw='', dialogActions=null, busy=false;
+
+  // 구글 웹 앱 주소 (배포 주소가 바뀌면 여기만 고치세요)
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwiNF0r7i8dmtQqfNj_wvvdjtUiPqsD2MfMjKZqkusmZF_6qSq6ODZrPE5XiJVpTFcI/exec';
+  async function call(fn){
+    const args=[].slice.call(arguments,1);
+    const res=await fetch(API_URL,{method:'POST',redirect:'follow',credentials:'omit',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:fn,args:args})});
+    const j=await res.json();
+    if(!j.ok) throw new Error(j.error||'error');
+    return j.data;
+  }
+
+
+  function slotState(ds,h){
+    const id=ds+'_'+h.replace(':','');
+    if(ds < ymd(START)) return {id,kind:'off'};
+    if(slots[id]) return {id,kind:'taken',name:slots[id]};
+    if(closed.days.includes(ds) || closed.slots.includes(id)) return {id,kind:'closed'};
+    if(new Date(ds+'T'+h+':00').getTime() <= Date.now()) return {id,kind:'past'};
+    return {id,kind:'open'};
+  }
+
+  function render(){
+    const end=new Date(weekStart); end.setDate(end.getDate()+4);
+    $('weektitle').textContent = window.innerWidth<420 ? (weekStart.getMonth()+1)+'/'+weekStart.getDate()+' ~ '+(end.getMonth()+1)+'/'+end.getDate()+' 주간' : (weekStart.getMonth()+1)+'월 '+weekStart.getDate()+'일 ~ '+(end.getMonth()+1)+'월 '+end.getDate()+'일';
+    $('prev').disabled = weekStart <= firstMonday;
+    $('sheet').classList.toggle('teacher',teacherMode);
+    $('tbanner').hidden=!teacherMode;
+    $('teacherBtn').textContent = teacherMode ? '선생님 모드 끄기' : '선생님 모드';
+    const wk=$('week'); wk.textContent='';
+    for(let i=0;i<5;i++){
+      const day=new Date(weekStart); day.setDate(day.getDate()+i);
+      const ds=ymd(day), before=ds<ymd(START), dayClosed=closed.days.includes(ds);
+      const col=document.createElement('div'); const gone = before || TIMES.every(h=>new Date(ds+'T'+h+':00').getTime()<=Date.now()); col.className='day'+(gone?' gone':'');
+      const head=document.createElement(teacherMode && !before ? 'button':'div');
+      head.className='dayhead d'+i+(dayClosed?' closed':'')+(before?' off':'');
+      const nm=document.createElement('span'); nm.textContent=DOW[day.getDay()]+'요일 ('+(day.getMonth()+1)+'/'+day.getDate()+')';
+      const sm=document.createElement('small'); sm.textContent= before?'신청 전': gone?'지난 날': dayClosed?'상담 없음':'';
+      head.append(nm,sm);
+      if(teacherMode && !before){ head.type='button'; head.addEventListener('click',()=>toggleDay(ds)); }
+      col.append(head);
+      const box=document.createElement('div'); box.className='box';
+      for(const h of TIMES){
+        const st=slotState(ds,h);
+        const b=document.createElement('button'); b.type='button';
+        b.className='slot '+(st.kind==='off'?'past':st.kind)+(st.kind==='taken' && q() && st.name.toLowerCase().includes(q()) ? ' hit':'');
+        const t=document.createElement('span'); t.className='t'; t.textContent=h;
+        const n=document.createElement('span'); n.className='n';
+        n.textContent = !ready ? '불러오는 중' : st.kind==='taken'?st.name : st.kind==='closed'?'상담불가' : st.kind==='open'?'+ 신청하기' : '마감';
+        b.append(t,n);
+        b.setAttribute('aria-label',ds+' '+h+' '+n.textContent);
+        if(!ready) b.setAttribute('aria-disabled','true');
+        else if(teacherMode && (st.kind==='open'||st.kind==='closed'||st.kind==='taken')) b.addEventListener('click',()=>teacherSlot(ds,h,st));
+        else if(st.kind==='open') b.addEventListener('click',()=>askBook(ds,h,st.id));
+        else b.setAttribute('aria-disabled','true');
+        box.append(b);
+      }
+      col.append(box); wk.append(col);
+    }
+    renderResults();
+  }
+
+
+  const nameOf = v => (v && typeof v==='object') ? (v.name||'') : (v||'');
+  const q = () => $('myname').value.trim().toLowerCase();
+  function renderResults(){
+    const box=$('results'); const term=q();
+    if(!term){ box.hidden=true; return; }
+    const hits=Object.keys(slots).filter(id=>nameOf(slots[id]).toLowerCase().includes(term)).sort();
+    box.textContent=''; box.hidden=false;
+    const h=document.createElement('div'); h.className='rh';
+    h.textContent = hits.length ? '"'+$('myname').value.trim()+'" 신청 '+hits.length+'건 (누르면 그 주로 이동)' : '';
+    if(hits.length) box.append(h);
+    if(!hits.length){ const n=document.createElement('div'); n.className='none'; n.textContent= ready? '그 이름으로 된 신청이 없어요.' : '불러오는 중이에요...'; box.append(n); return; }
+    hits.forEach(id=>{
+      const ds=id.slice(0,10), hm=id.slice(11,13)+':'+id.slice(13,15);
+      const b=document.createElement('button'); b.type='button';
+      b.textContent=label(ds,hm)+'  '+nameOf(slots[id]);
+      b.onclick=()=>{ weekStart=mondayOf(new Date(ds+'T00:00:00')); render(); };
+      box.append(b);
+    });
+  }
+  $('myname').addEventListener('input',()=>{ render(); });
+  const label=(ds,h)=>{ const d=new Date(ds+'T00:00:00'); return (d.getMonth()+1)+'월 '+d.getDate()+'일 ('+DOW[d.getDay()]+') '+h; };
+  function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.tm); toast.tm=setTimeout(()=>t.hidden=true,2600); }
+
+  function openDialog(who,text,opts){
+    const d=$('dialog'); d.textContent='';
+    const w=document.createElement('div'); w.className='who'; w.textContent=who;
+    const p=document.createElement('p'); p.textContent=text; d.append(w,p);
+    let inp=null;
+    if(opts.input){
+      inp=document.createElement('input'); inp.id='dlginput'; inp.maxLength=20;
+      if(opts.password){ inp.type='password'; inp.inputMode='numeric'; inp.className='pw'; inp.autocomplete='off'; }
+      else { inp.placeholder='이름'; try{ inp.value=localStorage.getItem('counsel-name')||''; }catch(e){} }
+      d.append(inp);
+    }
+    const c=document.createElement('div'); c.className='choices';
+    const no=document.createElement('button'); no.textContent=opts.no||'닫기';
+    const yes=document.createElement('button'); yes.className='yes'; yes.textContent=opts.yes||'확인';
+    c.append(no,yes); d.append(c); $('scrim').hidden=false;
+    dialogActions={ ok:()=>opts.onYes(inp?inp.value.trim():null) };
+    yes.onclick=dialogActions.ok; no.onclick=closeDialog;
+    if(inp){ inp.focus(); inp.addEventListener('keydown',e=>{ if(e.key==='Enter') dialogActions.ok(); }); } else yes.focus();
+  }
+  function closeDialog(){ $('scrim').hidden=true; dialogActions=null; }
+  $('scrim').addEventListener('click',e=>{ if(e.target===$('scrim')) closeDialog(); });
+
+  function renderPending(roster){
+    if(!Array.isArray(roster) || !roster.length){ $('pending').hidden=true; return; }
+    const norm=t=>String(t||'').replace(/\s+/g,'');
+    const booked=Object.keys(slots).map(id=>norm(nameOf(slots[id])));
+    const left=roster.filter(n=>!booked.some(b=>b.includes(norm(n))));
+    $('pending').hidden=false;
+    $('pendingCount').textContent='('+left.length+'명 / '+roster.length+'명)';
+    const list=$('pendingList'); list.textContent='';
+    left.forEach(n=>{ const c=document.createElement('span'); c.textContent=n; list.append(c); });
+    list.hidden=!left.length; $('pendingDone').hidden=!!left.length;
+    document.querySelector('#pending .pnote').hidden=!left.length;
+  }
+  function applyState(s){
+    slots=s.slots||{}; closed=s.closed||{days:[],slots:[]};
+    if(Array.isArray(s.times) && s.times.length) TIMES=s.times;
+    if(s.start){ const p=s.start.split('-').map(Number); START=new Date(p[0],p[1]-1,p[2]); firstMonday=mondayOf(START); }
+    ready=true; setLive('실시간',true); render(); renderPending(s.roster);
+  }
+  async function refresh(){
+    if(busy) return;
+    try{ applyState(await call('getState')); }catch(e){ setLive('연결 끊김',false); }
+  }
+
+  function askBook(ds,h,id){
+    openDialog(label(ds,h),'이 시간에 상담을 신청할까요? 이름을 적어 주세요.',{input:true,yes:'신청',no:'그만두기',
+      onYes: async (name)=>{
+        if(!name){ toast('이름을 먼저 입력해 주세요'); return; }
+        try{localStorage.setItem('counsel-name',name)}catch(e){}
+        closeDialog(); toast('신청 중...'); busy=true;
+        let r='error'; try{ r=await call('book',id,name); }catch(e){}
+        busy=false;
+        if(r==='ok') toast('🎉 '+name+' 님 신청 완료! '+label(ds,h));
+        else if(r==='taken') toast('앗, 방금 다른 사람이 신청했어요');
+        else if(r==='closed') toast('이 시간은 상담불가로 바뀌었어요');
+        else if(r==='past') toast('이미 지난 시간이에요');
+        else if(r==='busy') toast('신청이 몰리고 있어요. 잠시 후 다시 눌러 주세요');
+        else toast('저장하지 못했어요. 잠시 후 다시 시도해 주세요');
+        refresh();
+      }});
+  }
+
+  async function teacherCall(fn,a,b,msg){
+    busy=true;
+    try{ const s = b===undefined ? await call(fn,teacherPw,a) : await call(fn,teacherPw,a,b); busy=false; applyState(s); if(msg) toast(msg); }
+    catch(e){ busy=false; toast('저장하지 못했어요. 선생님 모드를 다시 켜 주세요'); refresh(); }
+  }
+  function toggleDay(ds){
+    const on=!closed.days.includes(ds);
+    teacherCall('toggleClosed','하루',ds, on?'하루 전체를 상담불가로 바꿨어요':'다시 상담 가능으로 바꿨어요');
+  }
+  function teacherSlot(ds,h,st){
+    if(st.kind==='taken'){
+      openDialog(label(ds,h), st.name+' 님의 신청을 취소할까요?',{yes:'신청 취소',no:'그대로 두기',
+        onYes: ()=>{ closeDialog(); teacherCall('cancelBooking',st.id,undefined,'신청을 취소했어요'); }});
+      return;
+    }
+    if(closed.days.includes(ds)){ toast('하루 전체가 상담불가예요. 요일 라벨을 눌러 먼저 풀어 주세요'); return; }
+    teacherCall('toggleClosed','시간',st.id, st.kind==='closed'?'다시 상담 가능으로 바꿨어요':'이 시간을 상담불가로 바꿨어요');
+  }
+
+  $('teacherBtn').onclick=()=>{
+    if(teacherMode){ teacherMode=false; teacherPw=''; render(); toast('선생님 모드를 껐어요'); return; }
+    openDialog('선생님 모드','비밀번호를 눌러 주세요.',{input:true,password:true,yes:'입장',no:'닫기',
+      onYes: async (pw)=>{
+        let ok=false; try{ ok=await call('verifyTeacher',pw||''); }catch(e){}
+        if(ok){ teacherPw=pw; teacherMode=true; closeDialog(); render(); toast('선생님 모드 ON'); }
+        else { toast('비밀번호가 맞지 않아요'); const i=$('dlginput'); if(i){ i.value=''; i.focus(); } }
+      }});
+  };
+
+  function shift(n){ const d=new Date(weekStart); d.setDate(d.getDate()+7*n); if(d<firstMonday) return; weekStart=d; render(); }
+  $('prev').onclick=()=>shift(-1);
+  $('next').onclick=()=>shift(1);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){ closeDialog(); return; }
+    if(e.target.tagName==='INPUT' || !$('scrim').hidden) return;
+    if(e.key==='ArrowLeft') shift(-1); else if(e.key==='ArrowRight') shift(1);
+  });
+  function setLive(txt,on){ $('livetext').textContent=txt; $('live').classList.toggle('on',on); }
+
+  render();
+  refresh();
+  setInterval(()=>{ if(!document.hidden) refresh(); },8000);
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) refresh(); });
+})();
+</script>
+</body>
+</html>
