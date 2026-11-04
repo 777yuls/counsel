@@ -240,7 +240,7 @@ html,body{max-width:100%;overflow-x:hidden}
   let ready=false, slots={}, closed={days:[],slots:[]}, teacherMode=false, teacherPw='', dialogActions=null, busy=false;
 
   // 구글 웹 앱 주소 (배포 주소가 바뀌면 여기만 고치세요)
-  const API_URL = 'https://script.google.com/macros/s/AKfycbwiNF0r7i8dmtQqfNj_wvvdjtUiPqsD2MfMjKZqkusmZF_6qSq6ODZrPE5XiJVpTFcI/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwIwqjNMwp2KF3q7IxIFNTXYKFBXRRyerrKFlXpjNVrsRLp4sCpIenqG4-Hz8dPxJvb/exec';
   async function call(fn){
     const args=[].slice.call(arguments,1);
     const res=await fetch(API_URL,{method:'POST',redirect:'follow',credentials:'omit',
